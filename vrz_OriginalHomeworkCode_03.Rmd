@@ -43,25 +43,15 @@ So while object "s" shows the 5 averages by gender, it can't be used to make the
 I used/modified the ggplot2 boxplot code from Module 6 for each variable. 
 
 ```{r - boxplots}
-p_weight <- ggplot(data = d, aes(x = gender, y = weight))
-p_weight <- p_weight + geom_boxplot()
-p_weight <- p_weight + xlab("Gender") + ylab("Weight")
+p_weight <- ggplot(data = d, aes(x = gender, y = weight)) + geom_boxplot() + xlab("Gender") + ylab("Weight")
 p_weight
-p_height <- ggplot(data = d, aes(x = gender, y = height))
-p_height <- p_height + geom_boxplot()
-p_height <- p_height + xlab("Gender") + ylab("Height")
+p_height <- ggplot(data = d, aes(x = gender, y = height)) + geom_boxplot() + xlab("Gender") + ylab("Height")
 p_height
-p_age<- ggplot(data = d, aes(x = gender, y = age))
-p_age <- p_age + geom_boxplot()
-p_age <- p_age + xlab("Gender") + ylab("Age")
+p_age<- ggplot(data = d, aes(x = gender, y = age)) + geom_boxplot() + xlab("Gender") + ylab("Age")
 p_age
-p_zombies<- ggplot(data = d, aes(x = gender, y = zombies_killed))
-p_zombies <- p_zombies + geom_boxplot()
-p_zombies <- p_zombies + xlab("Gender") + ylab("Zombies Killed")
+p_zombies<- ggplot(data = d, aes(x = gender, y = zombies_killed)) + geom_boxplot() + xlab("Gender") + ylab("Zombies Killed")
 p_zombies
-p_education<- ggplot(data = d, aes(x = gender, y = years_of_education))
-p_education <- p_education + geom_boxplot()
-p_education <- p_education + xlab("Gender") + ylab("Years of Education")
+p_education<- ggplot(data = d, aes(x = gender, y = years_of_education)) + geom_boxplot() + xlab("Gender") + ylab("Years of Education")
 p_education
 detach(d)
 ```
@@ -129,14 +119,14 @@ hist_age <- hist(d$age,xlab="Age",main="Population Age Distribution",col="lightc
 qq_age <- qqnorm(d$age, main = "Normal Q-Q plot Population Age") 
 qq_age <- qqline(d$age, col = "grey")
 ```
-Below is the Q-Q plot and histogram for the zombies killed by each person in the population. These data do not appear to be from a normal distribution, the  Q-Q plot points do not fall along the line and the histogram shows the distribution is skewed to the left (unimodal?). Perhaps Chi-squared distribution would be better?
+Below is the Q-Q plot and histogram for the zombies killed by each person in the population. These data do not appear to be from a normal distribution, the  Q-Q plot points do not fall along the line and the histogram shows the distribution is skewed to the left (unimodal?). Perhaps Poisson distribution would be better? discrete count data as opposed to continuous... binomial v Poisson, probability mass functions roughly show distribution in data, can model what data looks like under different distribution, for poisson need lambda and # of sample (we have that from the samples) suggest - look at poisson distribution and actual and see if they look the same
 
 ```{r - zombies killed}
 hist_zombies <- hist(d$zombies_killed,xlab="Zombies Killed",main="Population Distribution of Zombies Killed",col="slategray")
 qq_zombies <- qqnorm(d$zombies_killed, main = "Q-Q plot Zombies Killed") 
 qq_zombies <- qqline(d$zombies_killed, col = "grey")
 ```
-Below is the Q-Q plot and histogram for the zombies killed by each person in the population. These data do not appear to be from a normal distribution, the  Q-Q plot points do not fall along the line and the histogram shows the distribution is skewed to the left (unimodal?). Perhaps Chi-squared distribution would be better?
+Below is the Q-Q plot and histogram for the zombies killed by each person in the population. These data do not appear to be from a normal distribution, the  Q-Q plot points do not fall along the line and the histogram shows the distribution is skewed to the left (unimodal?). Perhaps Poisson distribution would be better? discrete count data as opposed to continuous 
 
 ```{r - education}
 hist_education <- hist(d$years_of_education,xlab="Years of Education",main="Population Distribution of Education",col="forestgreen")
@@ -207,7 +197,7 @@ ci_age <- c(lower, upper)
 ci_age
 ```
 
-Subset Zombies Killed - I know the zombies and education ones should be different but I am not quite sure what to do instead !!!!
+Subset Zombies Killed - I know the zombies and education ones should be different but I am not quite sure what to do instead !!!! CI for  non-normal variables --> significance of qnorm function, other q functions to use? confidence intervals by  bootstrapping does not require previous knowledge of where your sample  comes from? bootstrapping, taking values from previous distribution, supplemental code from Module 8...
 ```{r - sample zombies killed}
 avg_sample_zombies_killed <- mean(survivors$zombies_killed)
 std_sample_zombies_killed <- sd(survivors$zombies_killed)
@@ -231,7 +221,7 @@ avg_sample_education
 std_sample_education
 ```
 
-Subset Education 95% ci
+Subset Education 95% ci SHOULD BE POISSON CI
 ```{r - weight ci}
 lower <- avg_sample_education - qnorm(1 - 0.05/2) * sem(survivors$education)
 upper <- avg_sample_education + qnorm(1 - 0.05/2) * sem(survivors$education)
