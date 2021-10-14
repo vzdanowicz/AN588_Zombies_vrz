@@ -126,6 +126,16 @@ hist_zombies <- hist(d$zombies_killed,xlab="Zombies Killed",main="Population Dis
 qq_zombies <- qqnorm(d$zombies_killed, main = "Q-Q plot Zombies Killed") 
 qq_zombies <- qqline(d$zombies_killed, col = "grey")
 ```
+To assess the distribution of the zombies killed data, I used dpois() to visualize the data and see if it looks the same as the histogram. In order to do this I needed lambda, or the mean # of zombies killed. 
+
+I tried the code below but can't figure out how to check the distribution? 
+
+zombies <- d$zombies_killed
+l <- mean(d$zombies_killed)
+pois_zombies <- dpois(1000, lambda = l)
+barplot(pois_zombies, names.arg = 0:10, space = 0, xlab = "Zombies Killed", ylab = "Pr(X = x)", main = "Probability Mass Function")
+
+
 Below is the Q-Q plot and histogram for the zombies killed by each person in the population. These data do not appear to be from a normal distribution, the  Q-Q plot points do not fall along the line and the histogram shows the distribution is skewed to the left (unimodal?). Perhaps Poisson distribution would be better? discrete count data as opposed to continuous 
 
 ```{r - education}
