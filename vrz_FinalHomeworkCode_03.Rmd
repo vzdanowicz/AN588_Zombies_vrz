@@ -1,0 +1,409 @@
+---
+title: 'Homework 3: Some of my Best Friends are Zombies'
+author: "Victoria Zdanowicz"
+date: "10/6/2021"
+output: 
+  html_document:
+    toc: TRUE
+    toc_depth: 3
+    toc_float: TRUE
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+> Load in the dataset “zombies.csv” from my GitHub repo. This data includes the first name, last name, and gender of the entire population of 1000 people who have survived the zombie apocalypse and are now ekeing out an existence somewhere on the East Coast, along with several other variables (height, weight, age, number of years of education, number of zombies they have killed, and college major
+
+```{r - packages necessary,  loading data}
+library(curl)
+library(dplyr)
+library(ggplot2)
+library(gridExtra)
+
+z <- curl("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/master/AN588_Fall21/zombies.csv")
+d <- read.csv(z, header = TRUE, sep = ",", stringsAsFactors = FALSE)
+```
+
+# Challenge 1
+
+> Calculate the population mean and standard deviation for each quantitative random variable (height, weight, age, number of zombies killed, and years of education). NOTE: You will not want to use the built in var() and sd() commands as these are for samples. 
+
+I spent a super long time trying to figure out how to summarize the data into a df split up by gender with the averages (height, weight, etc.) calculate. I did this with the code below. I used select() to pull out only the necessary variables (height, weight, age, number of zombies killed, and years of education) and assigned it to a new object "w" which I then grouped by gender using group_by()... however I eventually realized that was not necessary because the boxplots plot needs **all** the data to plot the interquartile range, median, etc...     
+```{r - selecting and summarizing variables}
+attach(d)
+w <- select(d, gender, height, weight, zombies_killed, years_of_education)
+byGender <- group_by(w, gender)
+s <- summarise(byGender, avgweight = mean(weight, na.rm = TRUE), avgheight = mean(height, na.rm = TRUE), avgage = mean(age, na.rm = TRUE), avgzombies = mean(zombies_killed, na.rm = TRUE), avged = mean(years_of_education, na.rm = TRUE)) 
+s
+```
+ 
+After creating object s which contains the summarize means of all the variables by gender, I decided to create separate objects with the mean and standard deviations for each quantitative variable (not by gender). 
+
+## Functions
+I first created functions for population variance and population standard deviation since we are dealing with population data and not sample data.
+```{r - var and sd functions}
+pop_v <- function(x) {
+    sum((x - mean(x))^2)/(length(x))
+}
+pop_sd <- function(x) {
+    sqrt(pop_v(x))
+}
+```
+
+## Population Mean & SD
+Below are the mean/pop_sd of the desired variables. The pop_sd() function uses the variance function (pop_v()) to determine population standard deviation, as opposed to the command sd() which is for sample data
+
+### Population Weight
+```{r - weight mean/pop_sd}
+mu_weight <- mean(d$weight)
+pop_sd_weight <- pop_sd(d$weight)
+```
+
+### Population Height
+```{r - height mean/pop_sd}
+mu_height <- mean(d$height)
+pop_sd_height <- pop_sd(d$height)
+```
+
+### Population Age
+```{r - age mean/pop_sd}
+mu_age <- mean(d$age)
+pop_sd_age <- pop_sd(d$age)
+```
+
+### Population Zombies Killed
+```{r - zombies mean/pop_sd}
+mu_zombies_killed <- mean(d$zombies_killed)
+pop_sd_zombies_killed <- pop_sd(d$zombies_killed)
+```
+
+### Population Education
+```{r - education mean/pop_sd}
+mu_education <- mean(d$years_of_education)
+pop_sd_education <- pop_sd(d$years_of_education)
+```
+
+### Pop Mean & SD Dataframe
+I then placed these values in dataframe, pop_mean_sd. 
+```{r - df with population mean and sd}
+Variables <- c("Age", "Weight", "Height", "Zombies Killed", "Years of Education")
+Mean <- c(mu_age, mu_weight, mu_height, mu_zombies_killed, mu_education)
+Standard.Dev <- c(pop_sd_age, pop_sd_weight, pop_sd_height, pop_sd_zombies_killed, pop_sd_education)
+df_Population_Mean_SD <- data.frame(Variables,Mean,Standard.Dev)
+df_Population_Mean_SD
+```
+
+# Challenge 2 
+
+> Use {ggplot} to make boxplots of each of these variables by gender
+
+So while object "s" shows the 5 averages by gender, it can't be used to make the ggplot boxplots since it only has the averages. Instead, I needed to use the full dataframe - "d." I used/modified the ggplot2 boxplot code from Module 6 for each variable. 
+```{r - boxplots}
+p_weight <- ggplot(data = d, aes(x = gender, y = weight)) + geom_boxplot() + xlab("Gender") + ylab("Weight")
+p_height <- ggplot(data = d, aes(x = gender, y = height)) + geom_boxplot() + xlab("Gender") + ylab("Height")
+p_age<- ggplot(data = d, aes(x = gender, y = age)) + geom_boxplot() + xlab("Gender") + ylab("Age")
+p_zombies<- ggplot(data = d, aes(x = gender, y = zombies_killed)) + geom_boxplot() + xlab("Gender") + ylab("Zombies Killed")
+p_education<- ggplot(data = d, aes(x = gender, y = years_of_education)) + geom_boxplot() + xlab("Gender") + ylab("Years of Education")
+grid.arrange(p_weight, p_height, p_age, p_zombies, p_education, nrow = 3)
+```
+
+
+# Challenge 3
+> Use {ggplot} to make scatterplots of height and weight in relation to age. Do these variables seem to be related? In what way?
+
+I used the example code from Module 6 here as well in order to plot height v. weight. I visually separated the data here by gender and added a trend line. 
+```{r - height/weight scatterplots}
+attach(d)
+par(mfrow = c(1, 2))
+age_v_height <- ggplot(d, aes(x = age, y = height, color = gender)) + 
+                geom_point() + 
+                geom_smooth(method=lm) + 
+                  labs(
+                        x = "Age",
+                        y = "Height",
+                        color = "Gender",
+                    )
+age_v_weight <- ggplot(d, aes(x = age, y = weight, color = gender)) + 
+                geom_point() + 
+                geom_smooth(method=lm) + 
+                  labs(
+                        x = "Age",
+                        y = "Weight",
+                        color = "Gender",
+                    )
+grid.arrange(age_v_height, age_v_weight, nrow=2)
+```
+<br>
+These variables do appear to be related. As age increases, both height and weight increase. However, we can see there are trend differences between genders. 
+
+# Challenge 4 
+
+> Using histograms and Q-Q plots, check whether the quantitative variables seem to be drawn from a normal distribution. Which seem to be and which do not (hint: not all are drawn from the normal distribution)? For those that are not normal, can you determine from which common distribution they are drawn?
+
+Below is the Q-Q plot and histogram for population height. These data appear to be from a normal distribution, the points fall along the line in the Q-Q plot and the histogram shows a normally shaped distribution. 
+
+```{r - height}
+hist_height <- hist(d$height,xlab="Height",main="Population Height Distribution",col="darkslategray2")
+qq_height <- qqnorm(d$height, main = "Normal Q-Q plot Population Height") 
+qq_height <- qqline(d$height, col = "grey")
+```
+Below is the Q-Q plot and histogram for population weight. These data appear to be from a normal distribution, the points fall along the line in the Q-Q plot and the histogram shows a normally shaped distribution. 
+
+```{r - weight}
+hist_weight <- hist(d$weight,xlab="Weight",main="Population Weight Distribution",col="yellow")
+qq_weight <- qqnorm(d$weight, main = "Normal Q-Q plot Population Weight") 
+qq_weight <- qqline(d$weight, col = "grey")
+```
+Below is the Q-Q plot and histogram for population age. These data appear to be from a normal distribution, the points fall along the line in the Q-Q plot and the histogram shows a normally shaped distribution. 
+
+```{r - age}
+hist_age <- hist(d$age,xlab="Age",main="Population Age Distribution",col="lightcoral")
+qq_age <- qqnorm(d$age, main = "Normal Q-Q plot Population Age") 
+qq_age <- qqline(d$age, col = "grey")
+```
+Below is the Q-Q plot and histogram for the zombies killed by each person in the population. These data do not appear to be from a normal distribution, the  Q-Q plot points do not fall along the line and the histogram shows the distribution is skewed to the left and thus may be better represented by a Poisson distribution.
+
+```{r - zombies killed}
+hist_zombies <- hist(d$zombies_killed,xlab="Zombies Killed",main="Population Distribution of Zombies Killed",col="slategray")
+qq_zombies <- qqnorm(d$zombies_killed, main = "Q-Q plot Zombies Killed") 
+qq_zombies <- qqline(d$zombies_killed, col = "grey")
+```
+
+Below is the Q-Q plot and histogram for the years of education in the population. These data do not appear to be from a normal distribution, the  Q-Q plot points do not fall along the line and the histogram shows the distribution is skewed to the left and thus may be better represented by a Poisson distribution.
+```{r - education}
+hist_education <- hist(d$years_of_education,xlab="Years of Education",main="Population Distribution of Education",col="forestgreen")
+qq_education <- qqnorm(d$years_of_education, main = "Q-Q plot Years of Education") 
+qq_education <- qqline(d$years_of_education, col = "grey")
+```
+Number of zombies killed and years of education may be in Poisson Distribution because they are discrete count data as opposed to continuous data like height/weight...
+
+# Challenge 5
+
+> Now use the sample() function to sample ONE subset of 30 zombie survivors (without replacement) from this population and calculate the mean and sample standard deviation for each variable. Also estimate the standard error for each variable, and construct the 95% confidence interval for each mean. Note that for the variables that are not drawn from the normal distribution, you may need to base your estimate of the CIs on slightly different code than for the normal…
+
+I used the sample() function to pull out one subset, "survivors," of 30 zombie survivors without replacement. I also built a function sem(x) here to be used for determining sample standard error for each variable.
+
+```{r - survivor subset}
+survivors <- d[sample(1:nrow(d), 30, replace=FALSE),]
+sem <- function(x) {sd(x)/sqrt(length(x))}
+```
+
+
+## Subset Height 
+```{r - sample height}
+avg_sample_height <- mean(survivors$height)
+std_sample_height <- sd(survivors$height)
+```
+
+### Subset Height 95% ci
+```{r - height ci}
+sem(survivors$height)
+lower <- avg_sample_height - qnorm(1 - 0.05/2) * sem(survivors$height)
+upper <- avg_sample_height + qnorm(1 - 0.05/2) * sem(survivors$height)
+ci_height <- c(lower, upper)
+ci_height
+```
+
+## Subset Weight
+```{r - sample weight}
+avg_sample_weight <- mean(survivors$weight)
+std_sample_weight <- sd(survivors$weight)
+```
+
+### Subset Weight 95% ci
+```{r - weight ci}
+sem(survivors$weight)
+lower <- avg_sample_weight - qnorm(1 - 0.05/2) * sem(survivors$weight)
+upper <- avg_sample_weight + qnorm(1 - 0.05/2) * sem(survivors$weight)
+ci_weight <- c(lower, upper)
+ci_weight
+```
+
+## Subset Age
+```{r - sample age}
+avg_sample_age <- mean(survivors$age)
+std_sample_age <- sd(survivors$age)
+```
+
+### Subset Age 95% ci
+```{r - age ci}
+sem(survivors$age)
+lower <- avg_sample_age - qnorm(1 - 0.05/2) * sem(survivors$age)
+upper <- avg_sample_age + qnorm(1 - 0.05/2) * sem(survivors$age)
+ci_age <- c(lower, upper)
+ci_age
+```
+
+## Subset Zombies Killed
+```{r - sample zombies killed}
+avg_sample_zombies_killed <- mean(survivors$zombies_killed)
+std_sample_zombies_killed <- sd(survivors$zombies_killed)
+```
+
+### Subset Zombies Killed 95% ci  
+Since these data are not from a normal distribution, we can use bootstrapping to determine confidence intervals since this method does not require previous knowledge of the distribution the sample is from. I modified the code below from Module 8. 
+```{r - zombies ci via bootstrapping}
+zombies_killed_boot <- NULL  
+n <- 15
+for (i in 1:10000) {
+    zombies_killed_boot[i] <- mean(sample(survivors$zombies_killed, n, replace = TRUE))
+}
+ci_zombies_killed<-quantile(zombies_killed_boot, c(0.025, 0.975))
+ci_zombies_killed
+```
+
+## Subset Education
+```{r - sample education}
+avg_sample_education <- mean(survivors$years_of_education)
+std_sample_education <- sd(survivors$years_of_education)
+```
+
+### Subset Education 95% ci  
+Since these data are not from a normal distribution, we can use bootstrapping to determine confidence intervals since this method does not require previous knowledge of the distribution the sample is from. I modified the code below from Module 8. 
+```{r - education ci via bootstrapping}
+education_boot <- NULL  
+n <- 15
+for (i in 1:10000) {
+    education_boot[i] <- mean(sample(survivors$years_of_education, n, replace = TRUE))
+}
+ci_education<-quantile(education_boot, c(0.025, 0.975))
+ci_education
+```
+
+## Subset Dataframe
+I organized these values into a dataframe for easy viewing
+```{r - df subset data}
+Subset.Variables<-c("Height", "Weight", "Age", "Zombies Killed", "Years of Education")
+Subset.Mean <- c(avg_sample_height,avg_sample_weight,avg_sample_age,avg_sample_zombies_killed,avg_sample_education)
+Subset.StDev <- c(std_sample_height,std_sample_weight,std_sample_age,std_sample_zombies_killed,std_sample_education)
+Subset.CI <- c(ci_height,ci_weight,ci_age,ci_zombies_killed,ci_education)
+df_Subset <- data.frame(Subset.Variables,Subset.Mean,Subset.StDev,Subset.CI)
+df_Subset
+```
+
+
+# Challenge 6
+
+> Now draw 99 more random samples of 30 zombie apocalypse survivors, and calculate the mean for each variable for each of these samples. Together with the first sample you drew, you now have a set of 100 means for each variable (each based on 30 observations), which constitutes a sampling distribution for each variable. What are the means and standard deviations of this distribution of means for each variable? How do the standard deviations of means compare to the standard errors estimated in [5]? What do these sampling distributions look like (a graph might help here)? Are they normally distributed? What about for those variables that you concluded were not originally drawn from a normal distribution?
+
+```{r - for loop}
+survivor_samples_set <- NULL
+for (i in 1:99) {
+    survivor_samples_set[[i]] <- d[sample(1:nrow(d), 30, replace = FALSE), ]
+}
+#Adding our first 30 survivor sample
+survivor_samples_set[[100]]<-survivors
+
+```
+
+I created a for loop using code from Module 8 to find the mean/sd of every set of 30
+
+### Loop - Age
+```{r - for loop age}
+sample_mean_age <- NULL
+for (i in 1:100) {
+    sample_mean_age[i] <- mean(survivor_samples_set[[i]]$age)
+}
+loop_mean_age <- mean(sample_mean_age) 
+
+sample_sd_age <- NULL
+for (i in 1:100) {
+    sample_sd_age[i] <- sd(survivor_samples_set[[i]]$age)
+}
+
+loop_sd_age <- mean(sample_sd_age)
+```
+
+### Loop - Weight
+```{r - for loop weight}
+sample_mean_weight <- NULL
+for (i in 1:100) {
+    sample_mean_weight[i] <- mean(survivor_samples_set[[i]]$weight)
+}
+loop_mean_weight <- mean(sample_mean_weight)
+
+sample_sd_weight <- NULL
+for (i in 1:100) {
+    sample_sd_weight[i] <- sd(survivor_samples_set[[i]]$weight)
+}
+loop_sd_weight <- mean(sample_sd_weight)
+```
+
+### Loop - Height
+```{r - for loop height}
+sample_mean_height <- NULL
+for (i in 1:100) {
+    sample_mean_height[i] <- mean(survivor_samples_set[[i]]$height)
+}
+loop_mean_height <- mean(sample_mean_height)
+
+sample_sd_height <- NULL
+for (i in 1:100) {
+    sample_sd_height[i] <- sd(survivor_samples_set[[i]]$height)
+}
+loop_sd_height <- mean(sample_sd_height)
+```
+
+### Loop - Zombies Killed
+```{r - for loop zombies}
+sample_mean_zombies <- NULL
+for (i in 1:100) {
+    sample_mean_zombies[i] <- mean(survivor_samples_set[[i]]$zombies_killed)
+}
+loop_mean_zombies <- mean(sample_mean_height)
+
+sample_sd_zombies <- NULL
+for (i in 1:100) {
+    sample_sd_zombies[i] <- sd(survivor_samples_set[[i]]$zombies_killed)
+}
+loop_sd_zombies <- mean(sample_sd_zombies)
+```
+
+### Loop - Years of Education
+```{r - for loop education}
+sample_mean_education <- NULL
+for (i in 1:100) {
+    sample_mean_education[i] <- mean(survivor_samples_set[[i]]$years_of_education)
+}
+loop_mean_education <- mean(sample_mean_education)
+
+sample_sd_education <- NULL
+for (i in 1:100) {
+    sample_sd_education[i] <- sd(survivor_samples_set[[i]]$years_of_education)
+}
+loop_sd_education <- mean(sample_sd_education)
+```
+
+### Loop Dataframe
+
+I then created a dataframe with the variable averages and standard deviations from the loop data
+
+```{r - loop df}
+Variables <- c("Age", "Weight", "Height", "Zombies Killed", "Years of Education")
+Loop.Averages <- c(loop_mean_age, loop_mean_weight, loop_mean_height, loop_mean_zombies, loop_mean_education)
+Loop.Standard.Dev <- c(loop_sd_age, loop_sd_weight, loop_sd_height, loop_sd_zombies, loop_sd_education)
+df_PopulationLoop <- data.frame(Variables,Loop.Averages,Loop.Standard.Dev)
+df_PopulationLoop
+```
+
+
+### Loop Histograms
+
+Lastly, I created histograms of the loop data to investigate the sampling distribution. 
+```{r - subsample histograms}
+par(mfrow=c(3,2))
+sample_age_hist <- hist(sample_mean_age,xlab="Age",main="Sample Average Age")
+sample_weight_hist <- hist(sample_mean_weight,xlab="Weight",main="Sample Average Weight")
+sample_height_hist <- hist(sample_mean_height,xlab="Height",main="Sample Average Height")
+sample_zombies_hist <- hist(sample_mean_zombies,xlab="Zombies Killed",main="Sample Average Zombies Killed")
+sample_education_hist <- hist(sample_mean_education,xlab="Education",main="Sample Average Years of Education")
+```
+The zombies killed and education distributions, which were non-normal to start, appear more normal now. This makes sense given the assumptions of central tendency. I predict that as more sampling occurs and more means are added to the histograms, they will look increasingly more 'normal.' 
+
+
+# Overall Challenges
+
+1. This homework took me a very long time and a lot of brain power! I started off by making things way more complicated than necessary. But, I think I learned some interesting things along the way, like how to use the GroupBy and summarize functions to manage a large dataset. 
+2. I could not figure out how to plot the zombies and education data *as* Poisson? Was the point to just comment on the fact that the histogram did not look normal? I was unsure how to ~prove~ it was Poisson. I did figure out eventually how to edit the module code for calculating confidence intervals via bootstrapping. However, I am not entirely sure why I used n = 15, I copied it from the Module but wasn't sure if that was a number I should change or what the pros/cons of drawing more than 15? 
+3. I also spent a long time trying to figure out how to best display the various steps/results. Peer collaboration was super helpful with this, Frank showed me the gridExtra package an d grid.arrange() which helps make things look much clearner. I was also able to practice making multiple dataframes and even a few functions with the various calculations required. 
+4. At the start, it had a hard time conceptualizing what exactly the ~for loops~ were doing and how to organize and calculate the various necessary values. But again, talking through the homework questions out loud and with a classmate helped things make a lot more sense. 
+5. In general, the most challenging part of this assignment was keeping track of what exactly was being asked and which data were needed. I had to go back and forth between the homework questions, my code, and the modules so frequently. I ended up creating a word document that sort of outlined my thought process/steps because I was having a hard time organizing my work in rmarkdown. It made more sense to group calculations for each variable but I was often thinking of it one at a time so I needed another space to keep track of my train of thought. I am also still unsure of when exactly I should or could use attach() and detach()... could I just keep the dataset attached for multiple chunks? I was not confident in my use of it to start so I ended up just usng $ to select certain variables.
