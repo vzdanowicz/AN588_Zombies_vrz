@@ -251,6 +251,8 @@ ci_zombies_killed<-quantile(zombies_killed_boot, c(0.025, 0.975))
 ci_zombies_killed
 ```
 
+*good! but if you think it is poisson, you can also use the qpois() in the way you used qnorm. But bootstrapping is good if you don't know the distribution*
+
 ## Subset Education
 ```{r - sample education}
 avg_sample_education <- mean(survivors$years_of_education)
@@ -403,7 +405,7 @@ The zombies killed and education distributions, which were non-normal to start, 
 # Overall Challenges
 
 1. This homework took me a very long time and a lot of brain power! I started off by making things way more complicated than necessary. But, I think I learned some interesting things along the way, like how to use the GroupBy and summarize functions to manage a large dataset. 
-2. I could not figure out how to plot the zombies and education data *as* Poisson? Was the point to just comment on the fact that the histogram did not look normal? I was unsure how to ~prove~ it was Poisson. I did figure out eventually how to edit the module code for calculating confidence intervals via bootstrapping. However, I am not entirely sure why I used n = 15, I copied it from the Module but wasn't sure if that was a number I should change or what the pros/cons of drawing more than 15? 
+2. I could not figure out how to plot the zombies and education data *as* Poisson? Was the point to just comment on the fact that the histogram did not look normal? I was unsure how to ~prove~ it was Poisson. I did figure out eventually how to edit the module code for calculating confidence intervals via bootstrapping. However, I am not entirely sure why I used n = 15, I copied it from the Module but wasn't sure if that was a number I should change or what the pros/cons of drawing more than 15? *see the hw solutions for this*
 3. I also spent a long time trying to figure out how to best display the various steps/results. Peer collaboration was super helpful with this, Frank showed me the gridExtra package an d grid.arrange() which helps make things look much clearner. I was also able to practice making multiple dataframes and even a few functions with the various calculations required. 
 4. At the start, it had a hard time conceptualizing what exactly the ~for loops~ were doing and how to organize and calculate the various necessary values. But again, talking through the homework questions out loud and with a classmate helped things make a lot more sense. 
 5. In general, the most challenging part of this assignment was keeping track of what exactly was being asked and which data were needed. I had to go back and forth between the homework questions, my code, and the modules so frequently. I ended up creating a word document that sort of outlined my thought process/steps because I was having a hard time organizing my work in rmarkdown. It made more sense to group calculations for each variable but I was often thinking of it one at a time so I needed another space to keep track of my train of thought. I am also still unsure of when exactly I should or could use attach() and detach()... could I just keep the dataset attached for multiple chunks? I was not confident in my use of it to start so I ended up just usng $ to select certain variables.
