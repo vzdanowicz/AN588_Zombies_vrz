@@ -2,7 +2,7 @@
 title: 'Homework 3: Some of my Best Friends are Zombies'
 author: "Victoria Zdanowicz"
 date: "10/6/2021"
-output: 
+output:
   html_document:
     toc: TRUE
     toc_depth: 3
@@ -25,20 +25,20 @@ d <- read.csv(z, header = TRUE, sep = ",", stringsAsFactors = FALSE)
 
 # Challenge 1
 
-> Calculate the population mean and standard deviation for each quantitative random variable (height, weight, age, number of zombies killed, and years of education). NOTE: You will not want to use the built in var() and sd() commands as these are for samples. 
+> Calculate the population mean and standard deviation for each quantitative random variable (height, weight, age, number of zombies killed, and years of education). NOTE: You will not want to use the built in var() and sd() commands as these are for samples.
 
 I spent a super long time trying to figure out how to summarize the data into a df split up by gender with the averages (height, weight, etc.) calculate. I did this with the code below. I used select() to pull out only the necessary variables (height, weight, age, number of zombies killed, and years of education) and assigned it to a new object "w" which I then grouped by gender using group_by()... however I eventually realized that was not necessary because the boxplots plot needs **all** the data to plot the interquartile range, median, etc...     
 ```{r - selecting and summarizing variables}
 attach(d)
 w <- select(d, gender, height, weight, zombies_killed, years_of_education)
 byGender <- group_by(w, gender)
-s <- summarise(byGender, avgweight = mean(weight, na.rm = TRUE), avgheight = mean(height, na.rm = TRUE), avgage = mean(age, na.rm = TRUE), avgzombies = mean(zombies_killed, na.rm = TRUE), avged = mean(years_of_education, na.rm = TRUE)) 
+s <- summarise(byGender, avgweight = mean(weight, na.rm = TRUE), avgheight = mean(height, na.rm = TRUE), avgage = mean(age, na.rm = TRUE), avgzombies = mean(zombies_killed, na.rm = TRUE), avged = mean(years_of_education, na.rm = TRUE))
 s
 ```
 
 *cbind(mean = apply(s, 2, mean), sd = apply(s, 2, pop_sd))*
 
-After creating object s which contains the summarize means of all the variables by gender, I decided to create separate objects with the mean and standard deviations for each quantitative variable (not by gender). 
+After creating object s which contains the summarize means of all the variables by gender, I decided to create separate objects with the mean and standard deviations for each quantitative variable (not by gender).
 
 **Functions**
 I first created functions for population variance and population standard deviation since we are dealing with population data and not sample data.
@@ -85,7 +85,7 @@ pop_sd_education <- pop_sd(d$years_of_education)
 ```
 
 **Pop Mean & SD Dataframe**
-I then placed these values in dataframe, pop_mean_sd. 
+I then placed these values in dataframe, pop_mean_sd.
 ```{r - df with population mean and sd}
 Variables <- c("Age", "Weight", "Height", "Zombies Killed", "Years of Education")
 Mean <- c(mu_age, mu_weight, mu_height, mu_zombies_killed, mu_education)
@@ -94,11 +94,11 @@ df_Population_Mean_SD <- data.frame(Variables,Mean,Standard.Dev)
 df_Population_Mean_SD
 ```
 
-# Challenge 2 
+# Challenge 2
 
 > Use {ggplot} to make boxplots of each of these variables by gender
 
-So while object "s" shows the 5 averages by gender, it can't be used to make the ggplot boxplots since it only has the averages. Instead, I needed to use the full dataframe - "d." I used/modified the ggplot2 boxplot code from Module 6 for each variable. 
+So while object "s" shows the 5 averages by gender, it can't be used to make the ggplot boxplots since it only has the averages. Instead, I needed to use the full dataframe - "d." I used/modified the ggplot2 boxplot code from Module 6 for each variable.
 ```{r - boxplots}
 p_weight <- ggplot(data = d, aes(x = gender, y = weight)) + geom_boxplot(aes(fill = gender)) + ylab("Weight") + theme_bw()
 p_height <- ggplot(data = d, aes(x = gender, y = height)) + geom_boxplot(aes(fill = gender)) + ylab("Height") + theme_bw()
@@ -113,21 +113,21 @@ grid.arrange(p_weight, p_height, p_age, p_zombies, p_education, nrow = 3)
 # Challenge 3
 > Use {ggplot} to make scatterplots of height and weight in relation to age. Do these variables seem to be related? In what way?
 
-I used the example code from Module 6 here as well in order to plot height v. weight. I visually separated the data here by gender and added a trend line. 
+I used the example code from Module 6 here as well in order to plot height v. weight. I visually separated the data here by gender and added a trend line.
 ```{r - height/weight scatterplots}
 attach(d)
 par(mfrow = c(1, 2))
-age_v_height <- ggplot(d, aes(x = age, y = height, color = gender)) + 
-                geom_point() + 
-                geom_smooth(method=lm) + 
+age_v_height <- ggplot(d, aes(x = age, y = height, color = gender)) +
+                geom_point() +
+                geom_smooth(method=lm) +
                   labs(
                         x = "Age",
                         y = "Height",
                         color = "Gender",
                     )
-age_v_weight <- ggplot(d, aes(x = age, y = weight, color = gender)) + 
-                geom_point() + 
-                geom_smooth(method=lm) + 
+age_v_weight <- ggplot(d, aes(x = age, y = weight, color = gender)) +
+                geom_point() +
+                geom_smooth(method=lm) +
                   labs(
                         x = "Age",
                         y = "Weight",
@@ -136,38 +136,38 @@ age_v_weight <- ggplot(d, aes(x = age, y = weight, color = gender)) +
 grid.arrange(age_v_height, age_v_weight, nrow=2)
 ```
 <br>
-These variables do appear to be related. As age increases, both height and weight increase. However, we can see there are trend differences between genders. 
+These variables do appear to be related. As age increases, both height and weight increase. However, we can see there are trend differences between genders.
 
-# Challenge 4 
+# Challenge 4
 
 > Using histograms and Q-Q plots, check whether the quantitative variables seem to be drawn from a normal distribution. Which seem to be and which do not (hint: not all are drawn from the normal distribution)? For those that are not normal, can you determine from which common distribution they are drawn?
 
-Below is the Q-Q plot and histogram for population height. These data appear to be from a normal distribution, the points fall along the line in the Q-Q plot and the histogram shows a normally shaped distribution. 
+Below is the Q-Q plot and histogram for population height. These data appear to be from a normal distribution, the points fall along the line in the Q-Q plot and the histogram shows a normally shaped distribution.
 
 ```{r - height}
 hist_height <- hist(d$height,xlab="Height",main="Population Height Distribution",col="darkslategray2")
-qq_height <- qqnorm(d$height, main = "Normal Q-Q plot Population Height") 
+qq_height <- qqnorm(d$height, main = "Normal Q-Q plot Population Height")
 qq_height <- qqline(d$height, col = "grey")
 ```
-Below is the Q-Q plot and histogram for population weight. These data appear to be from a normal distribution, the points fall along the line in the Q-Q plot and the histogram shows a normally shaped distribution. 
+Below is the Q-Q plot and histogram for population weight. These data appear to be from a normal distribution, the points fall along the line in the Q-Q plot and the histogram shows a normally shaped distribution.
 
 ```{r - weight}
 hist_weight <- hist(d$weight,xlab="Weight",main="Population Weight Distribution",col="yellow")
-qq_weight <- qqnorm(d$weight, main = "Normal Q-Q plot Population Weight") 
+qq_weight <- qqnorm(d$weight, main = "Normal Q-Q plot Population Weight")
 qq_weight <- qqline(d$weight, col = "grey")
 ```
-Below is the Q-Q plot and histogram for population age. These data appear to be from a normal distribution, the points fall along the line in the Q-Q plot and the histogram shows a normally shaped distribution. 
+Below is the Q-Q plot and histogram for population age. These data appear to be from a normal distribution, the points fall along the line in the Q-Q plot and the histogram shows a normally shaped distribution.
 
 ```{r - age}
 hist_age <- hist(d$age,xlab="Age",main="Population Age Distribution",col="lightcoral")
-qq_age <- qqnorm(d$age, main = "Normal Q-Q plot Population Age") 
+qq_age <- qqnorm(d$age, main = "Normal Q-Q plot Population Age")
 qq_age <- qqline(d$age, col = "grey")
 ```
 Below is the Q-Q plot and histogram for the zombies killed by each person in the population. These data do not appear to be from a normal distribution, the  Q-Q plot points do not fall along the line and the histogram shows the distribution is skewed to the left and thus may be better represented by a Poisson distribution.
 
 ```{r - zombies killed}
 hist_zombies <- hist(d$zombies_killed,xlab="Zombies Killed",main="Population Distribution of Zombies Killed",col="slategray")
-qq_zombies <- qqnorm(d$zombies_killed, main = "Q-Q plot Zombies Killed") 
+qq_zombies <- qqnorm(d$zombies_killed, main = "Q-Q plot Zombies Killed")
 qq_zombies <- qqline(d$zombies_killed, col = "grey")
 ```
 *categorical variables will always stagger/step along the trend line*
@@ -175,7 +175,7 @@ qq_zombies <- qqline(d$zombies_killed, col = "grey")
 Below is the Q-Q plot and histogram for the years of education in the population. These data do not appear to be from a normal distribution, the  Q-Q plot points do not fall along the line and the histogram shows the distribution is skewed to the left and thus may be better represented by a Poisson distribution.
 ```{r - education}
 hist_education <- hist(d$years_of_education,xlab="Years of Education",main="Population Distribution of Education",col="forestgreen")
-qq_education <- qqnorm(d$years_of_education, main = "Q-Q plot Years of Education") 
+qq_education <- qqnorm(d$years_of_education, main = "Q-Q plot Years of Education")
 qq_education <- qqline(d$years_of_education, col = "grey")
 ```
 Number of zombies killed and years of education may be in Poisson Distribution because they are discrete count data as opposed to continuous data like height/weight...
@@ -243,8 +243,8 @@ avg_sample_zombies_killed <- mean(survivors$zombies_killed)
 std_sample_zombies_killed <- sd(survivors$zombies_killed)
 ```
 
-*Subset Zombies Killed 95% ci * 
-Since these data are not from a normal distribution, we can use bootstrapping to determine confidence intervals since this method does not require previous knowledge of the distribution the sample is from. I modified the code below from Module 8. 
+*Subset Zombies Killed 95% ci *
+Since these data are not from a normal distribution, we can use bootstrapping to determine confidence intervals since this method does not require previous knowledge of the distribution the sample is from. I modified the code below from Module 8.
 ```{r - zombies ci via bootstrapping}
 zombies_killed_boot <- NULL  
 n <- 15
@@ -255,14 +255,16 @@ ci_zombies_killed<-quantile(zombies_killed_boot, c(0.025, 0.975))
 ci_zombies_killed
 ```
 
-*Subset Education*
+*good! but if you think it is poisson, you can also use the qpois() in the way you used qnorm. But bootstrapping is good if you don't know the distribution*
+
+## Subset Education
 ```{r - sample education}
 avg_sample_education <- mean(survivors$years_of_education)
 std_sample_education <- sd(survivors$years_of_education)
 ```
 
 *Subset Education 95% ci  *
-Since these data are not from a normal distribution, we can use bootstrapping to determine confidence intervals since this method does not require previous knowledge of the distribution the sample is from. I modified the code below from Module 8. 
+Since these data are not from a normal distribution, we can use bootstrapping to determine confidence intervals since this method does not require previous knowledge of the distribution the sample is from. I modified the code below from Module 8.
 ```{r - education ci via bootstrapping}
 education_boot <- NULL  
 n <- 15
@@ -315,7 +317,7 @@ sample_mean_age <- NULL
 for (i in 1:100) {
     sample_mean_age[i] <- mean(survivor_samples_set[[i]]$age)
 }
-loop_mean_age <- mean(sample_mean_age) 
+loop_mean_age <- mean(sample_mean_age)
 
 sample_sd_age <- NULL
 for (i in 1:100) {
@@ -400,7 +402,7 @@ df_PopulationLoop
 
 **Loop Histograms**
 
-Lastly, I created histograms of the loop data to investigate the sampling distribution. 
+Lastly, I created histograms of the loop data to investigate the sampling distribution.
 ```{r - subsample histograms}
 par(mfrow=c(3,2))
 sample_age_hist <- hist(sample_mean_age,xlab="Age",main="Sample Average Age")
@@ -409,7 +411,7 @@ sample_height_hist <- hist(sample_mean_height,xlab="Height",main="Sample Average
 sample_zombies_hist <- hist(sample_mean_zombies,xlab="Zombies Killed",main="Sample Average Zombies Killed")
 sample_education_hist <- hist(sample_mean_education,xlab="Education",main="Sample Average Years of Education")
 ```
-The zombies killed and education distributions, which were non-normal to start, appear more normal now. This makes sense given the assumptions of central tendency. I predict that as more sampling occurs and more means are added to the histograms, they will look increasingly more 'normal.' 
+The zombies killed and education distributions, which were non-normal to start, appear more normal now. This makes sense given the assumptions of central tendency. I predict that as more sampling occurs and more means are added to the histograms, they will look increasingly more 'normal.'
 
 ```{r - combining loop data and pop data}
 df_Comparison <- data.frame(Variables,Loop.Averages, Mean, Loop.Standard.Dev, Standard.Dev)
@@ -419,8 +421,8 @@ df_Comparison
 
 # Overall Challenges
 
-1. This homework took me a very long time and a lot of brain power! I started off by making things way more complicated than necessary. But, I think I learned some interesting things along the way, like how to use the GroupBy and summarize functions to manage a large dataset. 
-2. I could not figure out how to plot the zombies and education data *as* Poisson? Was the point to just comment on the fact that the histogram did not look normal? I was unsure how to ~prove~ it was Poisson. I did figure out eventually how to edit the module code for calculating confidence intervals via bootstrapping. However, I am not entirely sure why I used n = 15, I copied it from the Module but wasn't sure if that was a number I should change or what the pros/cons of drawing more than 15? 
-3. I also spent a long time trying to figure out how to best display the various steps/results. Peer collaboration was super helpful with this, Frank showed me the gridExtra package an d grid.arrange() which helps make things look much clearner. I was also able to practice making multiple dataframes and even a few functions with the various calculations required. 
-4. At the start, it had a hard time conceptualizing what exactly the ~for loops~ were doing and how to organize and calculate the various necessary values. But again, talking through the homework questions out loud and with a classmate helped things make a lot more sense. 
+1. This homework took me a very long time and a lot of brain power! I started off by making things way more complicated than necessary. But, I think I learned some interesting things along the way, like how to use the GroupBy and summarize functions to manage a large dataset.
+2. I could not figure out how to plot the zombies and education data *as* Poisson? Was the point to just comment on the fact that the histogram did not look normal? I was unsure how to ~prove~ it was Poisson. I did figure out eventually how to edit the module code for calculating confidence intervals via bootstrapping. However, I am not entirely sure why I used n = 15, I copied it from the Module but wasn't sure if that was a number I should change or what the pros/cons of drawing more than 15? *see the hw solutions for this*
+3. I also spent a long time trying to figure out how to best display the various steps/results. Peer collaboration was super helpful with this, Frank showed me the gridExtra package an d grid.arrange() which helps make things look much clearner. I was also able to practice making multiple dataframes and even a few functions with the various calculations required.
+4. At the start, it had a hard time conceptualizing what exactly the ~for loops~ were doing and how to organize and calculate the various necessary values. But again, talking through the homework questions out loud and with a classmate helped things make a lot more sense.
 5. In general, the most challenging part of this assignment was keeping track of what exactly was being asked and which data were needed. I had to go back and forth between the homework questions, my code, and the modules so frequently. I ended up creating a word document that sort of outlined my thought process/steps because I was having a hard time organizing my work in rmarkdown. It made more sense to group calculations for each variable but I was often thinking of it one at a time so I needed another space to keep track of my train of thought. I am also still unsure of when exactly I should or could use attach() and detach()... could I just keep the dataset attached for multiple chunks? I was not confident in my use of it to start so I ended up just usng $ to select certain variables.
